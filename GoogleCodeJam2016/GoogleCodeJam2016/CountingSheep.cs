@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
@@ -14,8 +17,60 @@ namespace GoogleCodeJam2016.CountingSheep
     {
         public int N;
         public string Output;
+        public int CaseNumber;
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
+    }
+
+    public static class CountingSheepCaseHandler
+    {
+        public static IEnumerable<CountingSheepCase> GetCases(string filePath)
+        {
+            var cases = new List<CountingSheepCase>();
+
+            if (!File.Exists(filePath))
+                throw new Exception("Can't find file");
+
+            string[] text = File.ReadAllLines(filePath);
+
+            var lines = int.Parse(text[0]);
+
+            for (var i = 1; i <= lines; i++)
+            {
+                cases.Add(new CountingSheepCase
+                {
+                    N = int.Parse(text[i]),
+                    CaseNumber = i
+                });
+            }
+
+            return cases;
+        }
+
+        public static void ProcessCases(IEnumerable<CountingSheepCase> cases)
+        {
+            foreach (var countingSheepCase in cases)
+            {
+                var tiredSheep = new TiredSheep();
+
+                countingSheepCase.Output = tiredSheep.GetSleepNumber(countingSheepCase.N);
+            }
+        }
+
+        public static void PrintCaesResults(IEnumerable<CountingSheepCase> cases)
+        {
+            var countingSheepCases = cases as CountingSheepCase[] ?? cases.ToArray();
+
+            var output = new string[countingSheepCases.Count()];
+
+            foreach (var tiredSheepCase in countingSheepCases.OrderBy(x => x.CaseNumber))
+            {
+                output[tiredSheepCase.CaseNumber -1] = string.Format("Case #{0}: {1}", tiredSheepCase.CaseNumber,
+                    tiredSheepCase.Output);
+            }
+
+            File.WriteAllLines(Path.Combine(Directory.GetCurrentDirectory(), "CountingSheepResults.txt"), output);
+        }
     }
 
     public class NumberLogger
@@ -33,7 +88,7 @@ namespace GoogleCodeJam2016.CountingSheep
         }
     }
 
-    public class SleepCounter
+    public class TiredSheep
     {
         public static int MAX_EVALUATOR = 100;
         private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -111,11 +166,11 @@ namespace GoogleCodeJam2016.CountingSheep
         [TestCase(1692, "5076")]
         [TestCase(1234567890, "1234567890")]
         [TestCase(0, "INSOMNIA")]
-        public void TestSleepCounter(int n, string expectedResult)
+        public void TesttiredSheep(int n, string expectedResult)
         {
-            var sleepCounter = new SleepCounter();
+            var tiredSheep = new TiredSheep();
 
-            var result = sleepCounter.GetSleepNumber(n);
+            var result = tiredSheep.GetSleepNumber(n);
 
             Assert.AreEqual(expectedResult, result);
 
@@ -124,11 +179,11 @@ namespace GoogleCodeJam2016.CountingSheep
         [TestCase(1000000)]
         [TestCase(9999999)]
         [TestCase(999999)]
-        public void TestSleepCounterMaxTest(int n)
+        public void TesttiredSheepMaxTest(int n)
         {
-            var sleepCounter = new SleepCounter();
+            var tiredSheep = new TiredSheep();
 
-            var result = sleepCounter.GetSleepNumber(n);
+            var result = tiredSheep.GetSleepNumber(n);
 
             Console.WriteLine(result);
         }
@@ -138,9 +193,9 @@ namespace GoogleCodeJam2016.CountingSheep
         {
             for (var i = 101; i > -1; i --)
             {
-                var sleepCounter = new SleepCounter();
+                var tiredSheep = new TiredSheep();
 
-                var result = sleepCounter.GetSleepNumber(200 - i);
+                var result = tiredSheep.GetSleepNumber(200 - i);
             }
         }
 
@@ -149,9 +204,9 @@ namespace GoogleCodeJam2016.CountingSheep
         {
             for (var i = 101; i > -1; i--)
             {
-                var sleepCounter = new SleepCounter();
+                var tiredSheep = new TiredSheep();
 
-                var result = sleepCounter.GetSleepNumber(1000000 - i);
+                var result = tiredSheep.GetSleepNumber(1000000 - i);
             }
         }
 
