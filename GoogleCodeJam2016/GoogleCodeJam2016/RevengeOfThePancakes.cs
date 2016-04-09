@@ -116,5 +116,20 @@ namespace GoogleCodeJam2016.RevengeOfThePancakes
 
             Assert.AreEqual(expectedHash, newPancakeStack.GetHash());
         }
+
+        [TestCase("-", 1)]
+        [TestCase("+", 0)]
+        [TestCase("-+", 3)]
+        [TestCase("+-", 0)]
+        [TestCase("+---", 0)]
+        [TestCase("-+++", 15)]
+        public void FlipTestTopOnly(string input, int expectedHash)
+        {
+            var pancakeStack = new PancakeStack(input);
+
+            var newPancakeStack = PancakeFlipper.Flip(1, pancakeStack);
+
+            Assert.AreEqual(expectedHash, newPancakeStack.GetHash());
+        }
     }
 }
